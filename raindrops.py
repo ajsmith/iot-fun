@@ -4,11 +4,11 @@ import time
 import random
 
 
-COLOR_MAX = 10
-
 SPEED = 10
 
 MUTATION_RATE = 0.05
+
+MAX_BRIGHTNESS = 10
 
 
 class Fader(object):
@@ -26,14 +26,14 @@ class Fader(object):
 
     """
 
-    def __init__(self, color=(0, 0, 0), speed=1):
+    def __init__(self, color=(0, 0, 0), speed=0):
         self.color = color
         self.target_color = color
-        self.speed = speed
+        self.speed = speed or random_speed()
 
     def switch(self, color=None, speed=0):
         self.target_color = color or random_color()
-        self.speed = speed or random.randint(1, 3)
+        self.speed = speed or random_speed()
 
     def auto_switch(self):
         x = random.random()
@@ -60,24 +60,37 @@ class Fader(object):
         return self.color != self.target_color
 
 
+def shuffle(l):
+    result = []
+    while len(l) > 1:
+        e = random.choice(l)
+        l.remove(e)
+        result.append(e)
+    result.append(l[0])
+    return result
+
+
 def random_color():
-    c = (0, 0, 0)
-    while c == (0, 0, 0) or c == (COLOR_MAX, COLOR_MAX, COLOR_MAX):
-        c = tuple(random.randint(0, COLOR_MAX) for i in range(3))
-    return c
+    # Create a brightness budget
+    x = random.randint(0, MAX_BRIGHTNESS * 3)
+    # Carve out 3 random values from the budget
+    v1 = random.randint(0, x)
+    v2 = random.randint(0, x - v1)
+    v3 = x - v1 - v2
+    # Shuffle the values
+    c = shuffle([v1, v2, v3])
+    return tuple(c)
 
 
-def invert(color):
-    return tuple(COLOR_MAX - v for v in color)
-
-
-def random_color_pair():
-    c = random_color()
-    return (c, invert(c))
+def random_speed():
+    lower = max(1, int(MAX_BRIGHTNESS / 4))
+    upper = max(1, int(MAX_BRIGHTNESS / 2))
+    return random.randint(lower, upper)
 
 
 def main():
-    pixels = neopixel.NeoPixel(board.NEOPIXEL, 10, brightness=1.0, auto_write=False)
+    pixels = neopixel.NeoPixel(
+        board.NEOPIXEL, 10, brightness=1.0, auto_write=False)
     pixels.fill((0, 0, 0))
     pixels.show()
     faders = [Fader() for p in pixels]
