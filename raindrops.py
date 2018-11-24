@@ -70,20 +70,23 @@ def shuffle(l):
     return result
 
 
+def color_choices():
+    return (
+        0,
+        1,
+        int(MAX_BRIGHTNESS / 4),
+        int(MAX_BRIGHTNESS / 2),
+        MAX_BRIGHTNESS
+    )
+
+
 def random_color():
-    # Create a brightness budget
-    x = random.randint(0, MAX_BRIGHTNESS * 3)
-    # Carve out 3 random values from the budget
-    v1 = random.randint(0, x)
-    v2 = random.randint(0, x - v1)
-    v3 = x - v1 - v2
-    # Shuffle the values
-    c = shuffle([v1, v2, v3])
-    return tuple(c)
+    choices = color_choices()
+    return tuple(random.choice(choices) for i in range(3))
 
 
 def random_speed():
-    lower = max(1, int(MAX_BRIGHTNESS / 4))
+    lower = max(1, int(MAX_BRIGHTNESS / 10))
     upper = max(1, int(MAX_BRIGHTNESS / 2))
     return random.randint(lower, upper)
 
